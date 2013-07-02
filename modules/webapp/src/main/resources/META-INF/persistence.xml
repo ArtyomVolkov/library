@@ -6,6 +6,7 @@
 
     <persistence-unit name="libraryDatabase" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <class>grytsenko.library.model.BookEvent</class> 
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
 

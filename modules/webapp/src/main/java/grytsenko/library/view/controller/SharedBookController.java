@@ -4,9 +4,12 @@ import static grytsenko.library.view.Navigation.BOOK_ID_PARAM;
 import static grytsenko.library.view.Navigation.SHARED_BOOK_PATH;
 import static grytsenko.library.view.Navigation.USER_ATTR;
 import static grytsenko.library.view.Navigation.redirectToSharedBook;
+import grytsenko.library.model.BookEvent;
 import grytsenko.library.model.SharedBook;
 import grytsenko.library.model.User;
 import grytsenko.library.service.BookNotUpdatedException;
+import grytsenko.library.service.BookeventSqlService;
+import grytsenko.library.service.ManageBookEventService;
 import grytsenko.library.service.ManageSharedBooksService;
 import grytsenko.library.service.ManageUsersService;
 import grytsenko.library.service.NotifyUsersService;
@@ -14,6 +17,7 @@ import grytsenko.library.service.SearchSharedBooksService;
 import grytsenko.library.service.UserNotNotifiedException;
 
 import java.security.Principal;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,6 +55,8 @@ public class SharedBookController {
     SearchSharedBooksService searchSharedBooksService;
     @Autowired
     ManageSharedBooksService manageSharedBooksService;
+    @Autowired
+    ManageBookEventService manageBookEventService; 
 
     @ModelAttribute(USER_ATTR)
     public User currentUser(Principal principal) {
@@ -66,6 +72,11 @@ public class SharedBookController {
 
         SharedBook book = searchSharedBooksService.find(bookId);
         model.addAttribute("book", book);
+        
+        BookeventSqlService sqlService = new BookeventSqlService();
+        List<BookEvent> bookEvent = sqlService.getList(bookId);
+        model.addAttribute("bookEvent", bookEvent);
+        
         return SHARED_BOOK_PATH;
     }
 
@@ -81,6 +92,8 @@ public class SharedBookController {
         SharedBook book = searchSharedBooksService.find(bookId);
         book = manageSharedBooksService.reserve(book, user);
         notifyUsersService.notifyReserved(book, user);
+        BookEvent bookEvent = new BookEvent();
+        bookEvent = manageBookEventService.reserve(bookEvent, user, bookId);
 
         return redirectToSharedBook(bookId);
     }
@@ -97,6 +110,8 @@ public class SharedBookController {
         SharedBook book = searchSharedBooksService.find(bookId);
         User wasReservedBy = book.getUsedBy();
         book = manageSharedBooksService.release(book, user);
+        BookEvent bookEvent = new BookEvent();
+        bookEvent = manageBookEventService.release(bookEvent, user, bookId);
         notifyUsersService.notifyReleased(book, wasReservedBy);
 
         return redirectToSharedBook(bookId);
@@ -113,6 +128,8 @@ public class SharedBookController {
 
         SharedBook book = searchSharedBooksService.find(bookId);
         book = manageSharedBooksService.takeOut(book, user);
+        BookEvent bookEvent = new BookEvent();
+        bookEvent = manageBookEventService.tackeOut(bookEvent, user, bookId);
         notifyUsersService.notifyBorrowed(book, book.getUsedBy());
 
         return redirectToSharedBook(bookId);
@@ -130,6 +147,8 @@ public class SharedBookController {
         SharedBook book = searchSharedBooksService.find(bookId);
         User wasBorrowedBy = book.getUsedBy();
         book = manageSharedBooksService.takeBack(book, user);
+        BookEvent bookEvent = new BookEvent();
+        bookEvent = manageBookEventService.tackeBack(bookEvent, user, bookId);
         notifyUsersService.notifyReturned(book, wasBorrowedBy);
 
         return redirectToSharedBook(bookId);
