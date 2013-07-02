@@ -91,9 +91,9 @@ public class SharedBookController {
 
         SharedBook book = searchSharedBooksService.find(bookId);
         book = manageSharedBooksService.reserve(book, user);
-        notifyUsersService.notifyReserved(book, user);
         BookEvent bookEvent = new BookEvent();
         bookEvent = manageBookEventService.reserve(bookEvent, user, bookId);
+        notifyUsersService.notifyReserved(book, user);
 
         return redirectToSharedBook(bookId);
     }
@@ -150,6 +150,15 @@ public class SharedBookController {
         BookEvent bookEvent = new BookEvent();
         bookEvent = manageBookEventService.tackeBack(bookEvent, user, bookId);
         notifyUsersService.notifyReturned(book, wasBorrowedBy);
+
+        return redirectToSharedBook(bookId);
+    }
+    
+    @RequestMapping(params = "clear_log", method = RequestMethod.POST)
+    public String clear(@RequestParam(BOOK_ID_PARAM) Long bookId)
+            throws BookNotUpdatedException {
+        LOGGER.debug("Clear book event {}.", bookId);
+        manageBookEventService.clearLog(bookId);
 
         return redirectToSharedBook(bookId);
     }

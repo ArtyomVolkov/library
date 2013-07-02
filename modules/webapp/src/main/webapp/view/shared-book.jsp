@@ -142,9 +142,12 @@
                 </p>
                 	<c:if test="${user.isManager()}">
 						<%@include file="components/book-event.jsp"%>
-							<button name="clear_log" type="submit" class="btn btn-info">
+						<c:if test="${!bookEvent.isEmpty()}">
+							<button name="clear_log" type="submit" class="btn btn-danger">
+							  	<i class="icon-remove"></i>
 								<fmt:message key="book.action.clear" />
 							</button>
+						</c:if>
 					</c:if>
             </form:form>
         </div>

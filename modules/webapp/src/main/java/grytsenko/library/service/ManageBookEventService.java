@@ -1,6 +1,7 @@
 package grytsenko.library.service;
 
 import static grytsenko.library.util.DateUtils.now;
+import java.util.List;
 import grytsenko.library.model.BookEvent;
 import grytsenko.library.model.User;
 import grytsenko.library.repository.BookEventRepository;
@@ -57,6 +58,18 @@ public class ManageBookEventService {
 	public BookEvent update(BookEvent bookEvent) {
 		return bookEventRepository.saveAndFlush(bookEvent);
 
+	}
+	
+	/**
+	 * Clears the event log for required book.
+	 */
+	@Transactional
+	public void clearLog(Long bookId){
+		BookeventSqlService sqlService = new BookeventSqlService();
+		List<Long> bookEven = sqlService.getListId(bookId);
+		for (Long bookEvent : bookEven) {
+			bookEventRepository.delete(bookEvent);
+		}	
 	}
 
 }
